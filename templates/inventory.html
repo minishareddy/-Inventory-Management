@@ -1,0 +1,254 @@
+{% extends "index.html" %}
+{% block title %}Inventory - SmartStock{% endblock %}
+
+{% block content %}
+<div class="inventory-overview">
+    <div class="overview-card">
+        <h4><i class="fas fa-box"></i> Total Products</h4>
+        <h2>{{ total_products }}</h2>
+    </div>
+    <div class="overview-card">
+        <h4><i class="fas fa-dollar-sign"></i> Total Valuation</h4>
+        <h2>${{ total_valuation|floatformat:0 }}</h2>
+    </div>
+    <div class="overview-card">
+        <h4><i class="fas fa-exclamation-triangle"></i> Low Stock</h4>
+        <h2>{{ low_stock_count }}</h2>
+    </div>
+</div>
+
+<div class="inventory-container">
+    <div class="product-header">
+        <h3><i class="fas fa-list"></i> Products</h3>
+        <form method="GET" action="{% url 'inventory' %}" class="filters">
+            <label for="filter-category"><i class="fas fa-tags"></i> Category:</label>
+            <select id="filter-category" name="category" class="filter-select">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.category_id }}" {% if category.category_id|stringformat:"s" == request.GET.category %}selected{% endif %}>
+                    {{ category.category_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="filter-stock"><i class="fas fa-boxes"></i> Stock:</label>
+            <select id="filter-stock" name="stock" class="filter-select">
+                <option value="">All Stock Levels</option>
+                <option value="low" {% if request.GET.stock == 'low' %}selected{% endif %}>Low Stock</option>
+                <option value="high" {% if request.GET.stock == 'high' %}selected{% endif %}>High Stock</option>
+            </select>
+
+            <label for="filter-price"><i class="fas fa-dollar-sign"></i> Price Range:</label>
+            <select id="filter-price" name="price" class="filter-select">
+                <option value="">All Prices</option>
+                <option value="low" {% if request.GET.price == 'low' %}selected{% endif %}>Under $50</option>
+                <option value="mid" {% if request.GET.price == 'mid' %}selected{% endif %}>$50 - $200</option>
+                <option value="high" {% if request.GET.price == 'high' %}selected{% endif %}>Above $200</option>
+            </select>
+            <button type="submit" class="btn"><i class="fas fa-filter"></i> Apply Filters</button>
+        </form>
+        <form method="GET" action="{% url 'inventory' %} " class="searchbar"">
+            <button type=" submit" class="btn"><i class="fas fa-search"></i></button>
+            <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search Products...">
+        </form>
+        <button class="btn" onclick="openPopup(null,'Iadd')"><i class="fas fa-plus"></i> Add Product</button>
+    </div>
+
+    <div class="stock-table">
+        <div class="table-header">
+            <span><i class="fas fa-box"></i> Product</span>
+            <span><i class="fas fa-image"></i> Image</span>
+            <span><i class="fas fa-tags"></i> Category</span>
+            <span><i class="fas fa-boxes"></i> Stock</span>
+            <span><i class="fas fa-dollar-sign"></i> Price</span>
+            <span><i class="fas fa-truck"></i> Supplier</span>
+            <span><i class="fas fa-tools"></i> Actions</span>
+        </div>
+        <div class="table-body">
+            {% for product in products %}
+            <div class="stock-row" id="product-{{ product.product_id }}">
+                <span>{{ product.product_name }}</span>
+                <span>
+                    {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="product-img">
+                    {% endif %}
+                </span>
+                <span>{{ product.category.category_name }}</span>
+                <span>{{ product.quantity_in_stock }}</span>
+                <span>${{ product.unit_price }}</span>
+                <span>{{ product.supplier.supplier_name }}</span>
+                <span>
+                    <button class="btn" onclick="openPopup({{ product.product_id }},'Iupdate')"><i
+                            class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn" onclick="deleteProduct({{ product.product_id }})"><i class="fas fa-trash"></i>
+                    </button>
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="addProductPopup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup('Iadd')">&times;</span>
+        <h2><i class="fas fa-plus"></i> Add Product</h2>
+        <form id="addProductForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="addProductName">Product Name:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-box"></i> 
+                    <input type="text" id="addProductName" name="product_name" placeholder="Enter product name"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addProductCategory">Category:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-tags"></i>
+                    <select id="addProductCategory" name="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addProductSupplier">Supplier:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-truck"></i> 
+                    <select id="addProductSupplier" name="supplier" required>
+                        <option value="" disabled selected>Select a supplier</option>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.supplier_id }}">{{ supplier.supplier_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addProductQuantity">Stock Quantity:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-boxes"></i> 
+                    <input type="number" id="addProductQuantity" name="quantity" placeholder="Enter stock quantity"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addReorderLevel">Reorder Level:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <input type="number" id="addReorderLevel" name="reorder_level" placeholder="Enter reorder level"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addProductPrice">Price:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-dollar-sign"></i> 
+                    <input type="number" step="0.01" id="addProductPrice" name="price" placeholder="Enter price"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="addProductImage">Product Image:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-image"></i> 
+                    <input type="file" id="addProductImage" name="image">
+                </div>
+            </div>
+
+            <button type="button" class="btn" onclick="addProduct()">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="updateProductPopup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup('Iupdate')">&times;</span>
+        <h2><i class="fas fa-edit"></i> Update Product</h2>
+        <form id="updateProductForm">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" id="updateProductId">
+            <div class="form-group">
+                <label for="updateProductName">Product Name:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-box"></i> 
+                    <input type="text" id="updateProductName" name="product_name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateProductCategory">Category:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-tags"></i> 
+                    <select id="updateProductCategory" name="category" required>
+                        {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateProductSupplier">Supplier:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-truck"></i> 
+                    <select id="updateProductSupplier" name="supplier" required>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.supplier_id }}">{{ supplier.supplier_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateProductStock">Stock Quantity:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-boxes"></i> 
+                    <input type="number" id="updateProductStock" name="quantity" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateReorderLevel">Reorder Level:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <input type="number" id="updateReorderLevel" name="reorder_level" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateProductPrice">Price:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-dollar-sign"></i> 
+                    <input type="number" step="0.01" id="updateProductPrice" name="price" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="updateProductImage">Product Image:</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-image"></i> 
+                    <input type="file" id="updateProductImage" name="image">
+                </div>
+            </div>
+
+            <button type="button" class="btn" onclick="updateProduct()">
+                <i class="fas fa-save"></i> Update Product
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

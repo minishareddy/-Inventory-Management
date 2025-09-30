@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+{% block title %}Profile - SmartStock{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <img src="{{ user.image.url }}" alt="Profile Image" class="profile-img">
+            <h2>{{ user.username }}</h2>
+            <p class="role-badge">{{ user.get_role_display }}</p>
+        </div>
+        <div class="profile-info">
+            <p><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> {{ user.email }}</p>
+            <p><i class="fa-solid fa-calendar"></i> <strong>Date Joined:</strong> {{ user.date_joined|date:"F d, Y" }}
+            </p>
+            <p><i class="fa-solid fa-clock"></i> <strong>Last Login:</strong> {{ user.last_login|default:"Never" }}</p>
+        </div>
+        <button class="btn edit-btn" onclick="openPopup(null,'profile')">Edit Profile</button>
+    </div>
+    <div id="updatePopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closePopup('profile')">&times;</span>
+            <h2>Update Profile</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user-tag"></i>
+                        <select name="role">
+                            <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                            <option value="staff" {% if user.role == "staff" %}selected{% endif %}>Staff</option>
+                            <option value="manager" {% if user.role == "manager" %}selected{% endif %}>Manager</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="image">Profile Picture</label>
+                    <div class="input-wrapper">
+                        <i class="fa fa-image"></i>
+                        <input type="file" name="image" id="image">
+                    </div>
+                </div>
+                <button type="submit" class="btn save-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

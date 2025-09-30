@@ -1,0 +1,199 @@
+{% extends "index.html" %}
+{% block title %}Suppliers - SmartStock{% endblock %}
+{% block content %}
+<div class="suppliers-container">
+    <h2><i class="fas fa-truck"></i> Suppliers Overview</h2>
+    <button class="btn" onclick="openxPopup(null, 'addSupplier')"><i class="fas fa-plus"></i> Add Supplier</button>
+    <table>
+        <thead>
+            <tr>
+                <th><i class="fas fa-hashtag"></i> Supplier ID</th>
+                <th><i class="fas fa-image"></i> Logo</th>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-phone"></i> Contact</th>
+                <th><i class="fas fa-envelope"></i> Email</th>
+                <th><i class="fas fa-map-marker-alt"></i> Address</th>
+                <th><i class="fas fa-tools"></i> Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>#{{ supplier.supplier_id }}</td>
+                <td>
+                    {% if supplier.supplier_logo %}
+                    <img src="{{ supplier.supplier_logo.url }}" alt="{{ supplier.supplier_name }}" width="50"
+                        height="50">
+                    {% else %}
+                    <p>No Image</p>
+                    {% endif %}
+                </td>
+                <td>{{ supplier.supplier_name }}</td>
+                <td>{{ supplier.phone }}</td>
+                <td>{{ supplier.email }}</td>
+                <td>{{ supplier.address }}</td>
+                <td>
+                    <button class="btn" onclick="openxPopup({{ supplier.supplier_id }}, 'updateSupplier')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <a href="{% url 'delete_supplier' supplier.supplier_id %}" class="btn"
+                        onclick="return confirm('Are you sure you want to delete this supplier?')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Supplier Popup -->
+<div id="addSupplierPopup" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closexPopup('addSupplier')">&times;</span>
+        <h2><i class="fas fa-plus"></i> Add Supplier</h2>
+        <form method="POST" enctype="multipart/form-data" action="{% url 'add_supplier' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="supplierName">Supplier Name</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="supplierName" name="supplier_name" placeholder="Enter supplier name"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contactPerson">Contact Person</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="contactPerson" name="contact_person" placeholder="Enter contact person"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" id="phone" name="phone" placeholder="Enter phone number" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="Enter email" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <textarea id="address" name="address" placeholder="Enter address" required></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="supplierLogo">Supplier Logo</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-image"></i>
+                    <input type="file" id="supplierLogo" name="supplier_logo">
+                </div>
+            </div>
+
+            <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Supplier</button>
+        </form>
+    </div>
+</div>
+
+<!-- Update Supplier Popup -->
+{% for supplier in suppliers %}
+<div id="updateSupplierPopup{{ supplier.supplier_id }}" class="popup" style="display: none;">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closexPopup('updateSupplier')">&times;</span>
+        <h2><i class="fas fa-edit"></i> Update Supplier</h2>
+        <form method="POST" enctype="multipart/form-data" action="{% url 'update_supplier' supplier.supplier_id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="supplierName{{ supplier.supplier_id }}">Supplier Name</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="supplierName{{ supplier.supplier_id }}" name="supplier_name"
+                        value="{{ supplier.supplier_name }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contactPerson{{ supplier.supplier_id }}">Contact Person</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="contactPerson{{ supplier.supplier_id }}" name="contact_person"
+                        value="{{ supplier.contact_person }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone{{ supplier.supplier_id }}">Phone</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" id="phone{{ supplier.supplier_id }}" name="phone" value="{{ supplier.phone }}"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email{{ supplier.supplier_id }}">Email</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email{{ supplier.supplier_id }}" name="email" value="{{ supplier.email }}"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address{{ supplier.supplier_id }}">Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <textarea id="address{{ supplier.supplier_id }}" name="address"
+                        required>{{ supplier.address }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Current Logo</label><br>
+                {% if supplier.supplier_logo %}
+                <img src="{{ supplier.supplier_logo.url }}" alt="Current Logo" width="100">
+                {% else %}
+                <p>No Image</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="supplierLogo{{ supplier.supplier_id }}">Upload New Logo</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-image"></i>
+                    <input type="file" id="supplierLogo{{ supplier.supplier_id }}" name="supplier_logo">
+                </div>
+            </div>
+
+            <button type="submit" class="btn"><i class="fas fa-save"></i> Update Supplier</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    function openxPopup(id, type) {
+        const popupId = id ? `${type}Popup${id}` : `${type}Popup`;
+        document.getElementById(popupId).style.display = 'block';
+    }
+
+    function closexPopup(type) {
+        const popups = document.querySelectorAll(`#${type}Popup, [id^="${type}Popup"]`);
+        popups.forEach(popup => popup.style.display = 'none');
+    }
+</script>
+{% endblock %}

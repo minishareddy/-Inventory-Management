@@ -1,0 +1,67 @@
+{% extends "index.html" %}
+
+{% block title %}{{ page_title|default:"SmartStock - Sign Up" }}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Create an Account</h2>
+        {% if messages %}
+        {% for message in messages %}
+        <p class="error">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-user"></i>
+                    <input type="text" id="username" name="username" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-envelope"></i>
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password1">Password</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-lock toggle-password" data-target="password1"></i>
+                    <input type="password" id="password1" name="password1" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password2">Confirm Password</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-lock toggle-password" data-target="password2"></i>
+                    <input type="password" id="password2" name="password2" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-briefcase"></i>
+                    <select name="role" id="role">
+                        <option value="admin">Admin</option>
+                        <option value="staff" selected>Staff</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="image">Profile Picture</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-image"></i>
+                    <input type="file" name="image" id="image">
+                </div>
+            </div>
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </div>
+</div>
+{% endblock %}

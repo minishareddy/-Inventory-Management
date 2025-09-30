@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:"SmartStock" }}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="shortcut icon" href="{% static 'asset/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="page-title">
+            <h3>{% block page_title %}{{ page_title|default:"Dashboard" }}{% endblock %}</h3>
+        </div>
+        <div class="userprofile">
+            {% if user.is_authenticated %}
+            <li class="nav-item dropdown">
+                <a class="nav-link" id="notificationBell" href="{% url 'notifications' %}">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationCount" class="badge badge-danger">0</span>
+                </a>
+            </li>
+            <a href="{% url 'profile' %}"><img src="{{user.image.url}}" alt="Profile"></a>
+            {% else %}
+            <a href="{% url 'login' %}"><i class="fa fa-user"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="logo">
+            <a href="#"><i class="fa-solid fa-box"></i>SmartStock</a>
+        </div>
+        <div class="menu">
+            <a href="{% url 'dashboard' %}" class="{% if page_title == 'Dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+            <a href="{% url 'inventory' %}" class="{% if page_title == 'Inventory' %}active{% endif %}">
+                <i class="fa-solid fa-boxes-stacked"></i> Inventory
+            </a>
+            <a href="{% url 'sales' %}" class="{% if page_title == 'Sales' %}active{% endif %}">
+                <i class="fa-solid fa-cart-shopping"></i> Sales
+            </a>
+            <a href="{% url 'suppliers_list' %}" class="{% if page_title == 'Suppliers' %}active{% endif %}">
+                <i class="fa-solid fa-truck-fast"></i> Suppliers
+            </a>
+        </div>
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="logout-btn"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}" class="login-btn"><i class="fa-solid fa-sign-in-alt"></i> Sign In</a>
+            <a href="{% url 'signup' %}" class="signup-btn"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <script src="{% static 'scripts.js' %}"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+</body>
+
+</html>
