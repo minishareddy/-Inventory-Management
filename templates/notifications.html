@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+{% block title %}Notifications - SmartStock{% endblock %}
+{% block content %}
+<div class="notification-container">
+    <h4>Recent Notifications</h4>
+    <div id="unreadNotifications">
+        {% for notification in notifications %}
+        {% if notification.notification_id %}
+        {% if notification.status == "unread" %}
+        <form method="post" action="{% url 'mark_notification_read' notification.notification_id %}">
+            {% csrf_token %}
+            <button type="submit" class="notification-item unread">
+                <p><strong>{{ notification.message }}</strong></p>
+                <span>{{ notification.created_at|timesince }} ago</span>
+            </button>
+        </form>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+    <h4>Past Notifications</h4>
+    <div id="readNotifications">
+        {% for notification in notifications %}
+        {% if notification.status == "read" %}
+        <div class="notification-item read">
+            <p><strong>{{ notification.title }}:</strong> {{ notification.message }}</p>
+            <span>{{ notification.created_at|timesince }} ago</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

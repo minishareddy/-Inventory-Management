@@ -1,0 +1,96 @@
+{% extends "index.html" %}
+{% block title %}{{ page_title|default:"SmartStock" }}{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="overview-cards">
+        <div class="card">
+            <h4>Total Sales</h4>
+            <p>${{ total_sales|floatformat:0 }}</p>
+        </div>
+        <div class="card">
+            <h4>Total Inventory</h4>
+            <p>{{ total_inventory }} Items</p>
+        </div>
+        <div class="card">
+            <h4>New Orders</h4>
+            <p>{{ new_orders }}</p>
+        </div>
+        <div class="card">
+            <h4>Revenue Growth</h4>
+            <p>{{ revenue_growth }}</p>
+        </div>
+    </div>
+
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3>Sales Predictions</h3><canvas id="salesChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Revenue Growth</h3><canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let salesData = JSON.parse('{{ recent_sales|escapejs }}');
+
+        if (salesData.length > 0) {
+            let labels = salesData.map(sale => `${sale.product_name}`);
+            let salesValues = salesData.map(sale => sale.predicted_sales || 0);
+            let revenueValues = salesValues.map(value => value * 1.0);
+
+            let ctx = document.getElementById("salesChart").getContext("2d");
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{ 
+                        label: "Predicted Sales", 
+                        data: salesValues, 
+                        backgroundColor: "blue" 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }  // 🔴 Hide legend (optional)
+                    },
+                    scales: {
+                        x: { display: false },  // 🔴 Hide X-axis labels
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            let revenueCtx = document.getElementById("revenueChart").getContext("2d");
+            new Chart(revenueCtx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Revenue Growth",
+                        data: revenueValues,
+                        backgroundColor: "green",
+                        borderColor: "green",
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }  // 🔴 Hide legend (optional)
+                    },
+                    scales: {
+                        x: { display: false },  // 🔴 Hide X-axis labels
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        } else {
+            console.warn("No sales data available.");
+        }
+    });
+
+</script>
+{% endblock %}
